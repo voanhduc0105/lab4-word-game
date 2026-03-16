@@ -133,3 +133,6 @@ Input Validation Issues:
         Very long words causing display issues.
         Concurrent access to shared files (though rare in single-player).
 To avoid these, implement robust input sanitization, thorough testing with edge cases, and clear error handling. Use assertions or unit tests for invariants like non-decreasing counters.
+
+
+# 

@@ -2,7 +2,6 @@
 
 # First Impressions - Initial Take on the Project Assignment
 ## In this section, students will provide their initial thoughts on the project assignment, including their understanding of the requirements, any assumptions they made, points that need clarification, and their overall approach to tackling the project.
-
 Initially, I assumed that the would involve just building a simgple Hangman game, where you just need to guess the word and that's it. However, during the brainstorming process, I realized I require much more knowledge to do this. I also assumed that I can cheese this by using while True, but it was restricted so that thought was quickly discarded. The requirements were quite clear, so I need not any extra clarification for the points.
 
 

@@ -158,13 +158,121 @@ def play_game():
     if diff == '4':
         return
     
+    timedel(0.5)
+    mode = ""
+    while mode not in ('1', '2'):
+        print('Game Mode\n--------------------')
+        print('1. Singleplay')
+        print('2. Auto-Play\n')
+        mode = input('Select game mode (1-2): ')
+        if mode not in ('1', '2'):
+            print('Invalid choice.')
+            timedel(0.5)
+    if mode == '1':
+        singleplay(diff)
+    elif mode == '2':
+        autoplay(diff)
+
+
+def autoplay(diff):
+    # The bot should try to guess AEIOU first
+    secret_word = words[diff][rand.randint(0, len(words[diff])-1)].upper()
+    consonants = 'BCDFGHJKLMNPQRSTVWXYZ'
+    vowels = 'AEIOU'
+    vowc = 0
+    guessed = []
+    lives = 6
+    score = 0
+    difficulty = 'Easy' if diff == '1' else 'Normal' if diff == '2' else 'Hard'
+    timedel(1)
+    if secret_word != '':
+        while lives > 0 and score != len(secret_word):
+            o.system('clear')
+            print(f'Difficulty: {difficulty}')
+            print(f'The computer have {lives} tries left!')
+            print(hangman[6-lives])
+            print('\nWord:          ', end='')
+            display_letters = ''
+            for i in secret_word:
+                if i in guessed:
+                    display_letters += f' {i.upper()} '
+                else:
+                    display_letters += ' _ '
+            print(display_letters)
+            if len(guessed) == 0:
+                print('The computer have not made any guesses yet!')
+            else:
+                letters = ''
+                for i in range(len(guessed)):
+                    if i != len(guessed) - 1:
+                        letters += f'{guessed[i]}, '
+                    else:
+                        letters += f'{guessed[i]}.'
+                print(f'Guessed letters: {letters}')
+
+            if vowc <= len(vowels):
+                # it has not guessed all vowels
+                # again, no string manip, so we just select and rerun.
+                guess = vowels[rand.randint(0, len(vowels)-1)]
+                while guess not in guessed:
+                    guess = vowels[rand.randint(0, len(vowels)-1)]
+                vowels =+ 1
+            else:
+                guess = consonants[rand.randint(0, len(vowels)-1)]
+                while guess not in guessed:
+                    guess = consonants[rand.randint(0, len(consonants)-1)]
+
+            error = validate(guess, guessed)
+            if error:
+                print(error)
+            else:
+                print(f'The computer guessed {guess}.')
+                ti.sleep(1)
+                guessed, temp_lives = update_game_state(secret_word, guessed, guess, lives)
+                if lives != temp_lives:
+                    print('It was the wrong letter!')
+                    lives = temp_lives
+                    ti.sleep(1)
+                else:
+                    print('It was the correct letter!')
+                    score += secret_word.count(guess)
+                    ti.sleep(1)
+
+        o.system('clear')
+        if lives == 0:
+            print('The computer lost!')
+            print(hangman[6])
+            print('\nWord:          ', end='')
+            display_letters = ''
+            for i in secret_word:
+                display_letters += f' {i.upper()} '
+            print(display_letters)
+            print(f'The word was: {secret_word.upper()}\n')
+            enterdel()
+        else:
+            print('The computer won!')
+            print(hangman[6-lives])
+            print('\nWord:          ', end='')
+            display_letters = ''
+            for i in secret_word:
+                display_letters += f' {i.upper()} '
+            print(display_letters)
+            print(f'The word was: {secret_word.upper()}\n')
+            enterdel()
+        
+        history[f'{len(history)+1}'] = {'word': secret_word, 'state': 'LOSE' if lives == 0 else 'WIN', 'difficulty': difficulty, 'wrong_guesses': 6-lives, 'gamemode': 'Auto Play'}
+    else:
+        print('Failed to select word. Returning...')
+        timedel(1)
+
+
+def singleplay(diff):
     secret_word = words[diff][rand.randint(0, len(words[diff])-1)].upper()
     guessed = []
     lives = 6
     score = 0
     difficulty = 'Easy' if diff == '1' else 'Normal' if diff == '2' else 'Hard'
     timedel(1)
-    
     if secret_word != '':
         while lives > 0 and score != len(secret_word):
             o.system('clear')
@@ -222,7 +330,7 @@ def play_game():
             print(f'Your word was: {secret_word.upper()}\n')
             enterdel()
         
-        history[f'{len(history)+1}'] = {'word': secret_word, 'state': 'LOSE' if lives == 0 else 'WIN', 'difficulty': difficulty, 'wrong_guesses': 6-lives}
+        history[f'{len(history)+1}'] = {'word': secret_word, 'state': 'LOSE' if lives == 0 else 'WIN', 'difficulty': difficulty, 'wrong_guesses': 6-lives, 'gamemode': 'Single Play'}
     else:
         print('Failed to select word. Returning...')
         timedel(1)
@@ -238,6 +346,7 @@ def show_records():
             print(f'   - Difficulty: {history[i]['difficulty']}')
             print(f'   - State: {history[i]['state']}')
             print(f'   - Wrong Guesses: {history[i]['wrong_guesses']}')
+            print(f'   - Gamemode: {history[i]['gamemode']}')
             print('--------------------')
     enterdel()
 
