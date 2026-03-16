@@ -110,7 +110,7 @@ hangman = [
 ]
 
 history = {}
-
+computerguess = []
 
 def main_menu():
     global history
@@ -176,8 +176,26 @@ def play_game():
 
 def autoplay(diff):
     # The bot should try to guess AEIOU first
+    global computerguess
     secret_word = words[diff][rand.randint(0, len(words[diff])-1)].upper()
-    consonants = 'BCDFGHJKLMNPQRSTVWXYZ'
+    fails = 0
+    while secret_word in computerguess:
+        fails += 1
+        secret_word = words[diff][rand.randint(0, len(words[diff])-1)].upper()
+        if fails > 10:
+            break
+    computerguess.append(secret_word)
+
+    cons = 'BCDFGHJKLMNPQRSTVWXYZ'
+    # there is a 10% chance for the computer to know what the word is, sort of.
+    if rand.randint(1, 10) == 3:
+        consonants = secret_word
+        while len(consonants) < 12:
+            l = cons[rand.randint(0, len(cons)-1)]
+            if l not in consonants:
+                consonants += l
+    else:
+        consonants = cons
     vowels = 'AEIOU'
     vowc = 0
     guessed = []
@@ -185,84 +203,90 @@ def autoplay(diff):
     score = 0
     difficulty = 'Easy' if diff == '1' else 'Normal' if diff == '2' else 'Hard'
     timedel(1)
-    if secret_word != '':
-        while lives > 0 and score != len(secret_word):
-            o.system('clear')
-            print(f'Difficulty: {difficulty}')
-            print(f'The computer have {lives} tries left!')
-            print(hangman[6-lives])
-            print('\nWord:          ', end='')
-            display_letters = ''
-            for i in secret_word:
-                if i in guessed:
-                    display_letters += f' {i.upper()} '
-                else:
-                    display_letters += ' _ '
-            print(display_letters)
-            if len(guessed) == 0:
-                print('The computer have not made any guesses yet!')
-            else:
-                letters = ''
-                for i in range(len(guessed)):
-                    if i != len(guessed) - 1:
-                        letters += f'{guessed[i]}, '
+    if fails < 10:
+        if secret_word != '':
+            while lives > 0 and score != len(secret_word):
+                o.system('clear')
+                print(f'Difficulty: {difficulty}')
+                print(f'The computer have {lives} tries left!')
+                print(hangman[6-lives])
+                print('\nWord:          ', end='')
+                display_letters = ''
+                for i in secret_word:
+                    if i in guessed:
+                        display_letters += f' {i.upper()} '
                     else:
-                        letters += f'{guessed[i]}.'
-                print(f'Guessed letters: {letters}')
-
-            if vowc <= len(vowels):
-                # it has not guessed all vowels
-                # again, no string manip, so we just select and rerun.
-                guess = vowels[rand.randint(0, len(vowels)-1)]
-                while guess not in guessed:
-                    guess = vowels[rand.randint(0, len(vowels)-1)]
-                vowels =+ 1
-            else:
-                guess = consonants[rand.randint(0, len(vowels)-1)]
-                while guess not in guessed:
-                    guess = consonants[rand.randint(0, len(consonants)-1)]
-
-            error = validate(guess, guessed)
-            if error:
-                print(error)
-            else:
-                print(f'The computer guessed {guess}.')
-                ti.sleep(1)
-                guessed, temp_lives = update_game_state(secret_word, guessed, guess, lives)
-                if lives != temp_lives:
-                    print('It was the wrong letter!')
-                    lives = temp_lives
-                    ti.sleep(1)
+                        display_letters += ' _ '
+                print(display_letters)
+                if len(guessed) == 0:
+                    print('The computer have not made any guesses yet!')
                 else:
-                    print('It was the correct letter!')
-                    score += secret_word.count(guess)
-                    ti.sleep(1)
+                    letters = ''
+                    for i in range(len(guessed)):
+                        if i != len(guessed) - 1:
+                            letters += f'{guessed[i]}, '
+                        else:
+                            letters += f'{guessed[i]}.'
+                    print(f'Guessed letters: {letters}')
 
-        o.system('clear')
-        if lives == 0:
-            print('The computer lost!')
-            print(hangman[6])
-            print('\nWord:          ', end='')
-            display_letters = ''
-            for i in secret_word:
-                display_letters += f' {i.upper()} '
-            print(display_letters)
-            print(f'The word was: {secret_word.upper()}\n')
-            enterdel()
+                if vowc <= len(vowels)-1:
+                    # it has not guessed all vowels
+                    # again, no string manip, so we just select and rerun.
+                    guess = vowels[rand.randint(0, len(vowels)-1)]
+                    while guess in guessed:
+                        guess = vowels[rand.randint(0, len(vowels)-1)]
+                    vowc += 1
+                else:
+                    guess = consonants[rand.randint(0, len(consonants)-1)]
+                    while guess in guessed:
+                        guess = consonants[rand.randint(0, len(consonants)-1)]
+                
+                ti.sleep(1)
+
+                error = validate(guess, guessed)
+                if error:
+                    print(error)
+                else:
+                    print(f'The computer guessed {guess}.')
+                    ti.sleep(1)
+                    guessed, temp_lives = update_game_state(secret_word, guessed, guess, lives)
+                    if lives != temp_lives:
+                        print('It was the wrong letter!')
+                        lives = temp_lives
+                        ti.sleep(1)
+                    else:
+                        print('It was the correct letter!')
+                        score += secret_word.count(guess)
+                        ti.sleep(1)
+
+            o.system('clear')
+            if lives == 0:
+                print('The computer lost!')
+                print(hangman[6])
+                print('\nWord:          ', end='')
+                display_letters = ''
+                for i in secret_word:
+                    display_letters += f' {i.upper()} '
+                print(display_letters)
+                print(f'The word was: {secret_word.upper()}\n')
+                enterdel()
+            else:
+                print('The computer won!')
+                print(hangman[6-lives])
+                print('\nWord:          ', end='')
+                display_letters = ''
+                for i in secret_word:
+                    display_letters += f' {i.upper()} '
+                print(display_letters)
+                print(f'The word was: {secret_word.upper()}\n')
+                enterdel()
+            
+            history[f'{len(history)+1}'] = {'word': secret_word, 'state': 'LOSE' if lives == 0 else 'WIN', 'difficulty': difficulty, 'wrong_guesses': 6-lives, 'gamemode': 'Auto Play'}
         else:
-            print('The computer won!')
-            print(hangman[6-lives])
-            print('\nWord:          ', end='')
-            display_letters = ''
-            for i in secret_word:
-                display_letters += f' {i.upper()} '
-            print(display_letters)
-            print(f'The word was: {secret_word.upper()}\n')
-            enterdel()
-        
-        history[f'{len(history)+1}'] = {'word': secret_word, 'state': 'LOSE' if lives == 0 else 'WIN', 'difficulty': difficulty, 'wrong_guesses': 6-lives, 'gamemode': 'Auto Play'}
+            print('Failed to select word. Returning...')
+            timedel(1)
     else:
-        print('Failed to select word. Returning...')
+        print('Out of words. Returning...')
         timedel(1)
 
 

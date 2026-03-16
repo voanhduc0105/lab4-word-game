@@ -135,4 +135,15 @@ Input Validation Issues:
 To avoid these, implement robust input sanitization, thorough testing with edge cases, and clear error handling. Use assertions or unit tests for invariants like non-decreasing counters.
 
 
-# 
+# Auto-Play addition
+## My plans
+    - Since there is a difficulty selector, the program SHOULD ask to play singleplayer or auto-play after one has selected a difficulty
+    - Should re-use the code from maingame, but replace the user input with computer input
+    - Rename the maingame code to singleplay or something similar
+    - To implement computer input, I decide to force the computer to guess the vowels first (since it is the smartest move while playing hangman), then randomly select the consonants later
+    - Change display to say computer select, and allow delays to let the user read what the bot is playing.
+
+## Possible bugs and edge case
+    - The random may pick the same word twice, so add a global list that tracks all the words that the bot guesses.
+    - There will be a while loop which will ensure the computer doesnt pick the same word again. If all words are taken, implement a variable. If there are too many failure to pick a word, simply exit the loop
+    - Unless extremely lucky, the computer cannot win due to the nature of randomness. So there will be a 10% chance for the consonants list to only include the letters of the word + a few letters, max length being 12. This ensures the computer has a slightly higher chance to win.
